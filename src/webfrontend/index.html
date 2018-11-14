@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>奔驰4S</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+      <h2>基于ssm的前后端分离的Restful框架</h2>
+      <div>
+          <label for="name">车名</label>
+          <input type="text" id="name" placeholder="车名" class="form-control"/>
+          <label for="beginDate">日期：</label>
+          <input type="date" placeholder="开始日期" id="beginDate" class="form-control"/>
+          <input type="date" placeholder="结束日期" id="endDate" class="form-control"/>
+          <button type="button" id="btnQuery" class="btn btn-outline-primary">查询</button>
+          <button type="button" onclick="findById(0)" class="btn btn-outline-primary">新增</button>
+      </div>
+      <br/><br/>
+
+      <table class="table table-striped table-hover">
+         <thead>
+           <tr>
+               <td>编号</td>
+               <td>车名</td>
+               <td>价格</td>
+               <td>销售日期</td>
+               <td>操作</td>
+           </tr>
+         </thead>
+          <tbody></tbody>
+      </table>
+  </div>
+
+  <script src="js/jquery-3.3.1.min.js"></script>
+  <script src="js/car.js"></script>
+  <script>
+      $(window).on("load",function () {
+          loadCarList();
+      })
+
+      //查询车列表
+      function loadCarList() {
+          var name = $("#name").val();
+          var beginDate = $("#beginDate").val();
+          var endDate = $("#endDate").val();
+          $.ajax({
+              url:"http://127.0.0.1:8086/api/car",
+              dataType:"json",
+              type:"get",
+              data:{"name":name,"beginDate":beginDate,"endDate":endDate},
+              success:function (data) {
+                  console.log(data);
+                  if(!data){
+                      $('tbody').append("<tr><td colspan='4'>无记录</td></tr>")
+                  }
+                  let appendVal='';
+                  data.forEach(function (car,index) {
+                      appendVal += `
+                           <tr id="${car.id}">
+                               <td>${car.id} </td>
+                               <td>${car.name}</td>
+                               <td>${car.price}</td>
+                               <td>${car.saleDate}</td>
+                               <td>
+                               <button onclick="del(${car.id})" class='btn btn-outline-danger'>删除</button>
+                               &nbsp;&nbsp;
+                               <button onclick="findById(${car.id})" class='btn btn-outline-info'>修改</button>
+                               </td>
+                           </tr>
+                      `
+                  })
+                  $("tbody").html(appendVal);
+              }
+          })
+      }
+
+      //删除
+      function del(id) {
+         if(window.confirm("是否确认删除？")){
+             $.ajax({
+                 type:"delete",
+                 url:CAR_URL+id,
+                 success:function (data) {
+                     if(data==1){
+                         $("#"+id).remove();
+                     }
+                 }
+             })
+         }
+      }
+
+      //打开修改界面
+      function findById(id) {
+         localStorage.setItem("id",id);
+         window.location.href="caredit.html";
+      }
+  </script>
+</body>
+</html>
